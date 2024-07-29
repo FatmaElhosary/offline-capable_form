@@ -4,6 +4,7 @@ import { UtilsService } from '../services/utils.service';
 import { UserDto } from '../models/user';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { SelectImageComponent } from '../shared/select-image/select-image.component';
+import { RecordVoiceComponent } from '../shared/record-voice/record-voice.component';
 
 @Component({
   selector: 'offline-form',
@@ -11,23 +12,17 @@ import { SelectImageComponent } from '../shared/select-image/select-image.compon
   styleUrls: ['offline-form.page.scss'],
 })
 export class OfflineForm implements OnInit {
-  imageName: string = '';
+  selectedImg: any = '';
   @ViewChild(SelectImageComponent)
-  selectImageComponent: SelectImageComponent=new SelectImageComponent(null,null);
-  //record
-  mediaRecorder: any;
-  audioChunks: any[] = [];
-  audioBlob: any;
-  audioUrl: SafeUrl | null = null;
-  isRecording = false;
-  ///////////////////////
+  selectImageComponent: SelectImageComponent = new SelectImageComponent(null);
+  @ViewChild(RecordVoiceComponent)
+  recordVoiceComponent: any;
   constructor(
     private _fb: FormBuilder,
     private _utils: UtilsService,
     private sanitizer: DomSanitizer
   ) {}
   ngOnInit(): void {
-    this.initializeVoiceRecording();
     this.checkOnlineStatus();
   }
   offlineForm = this._fb.group({
@@ -61,63 +56,18 @@ export class OfflineForm implements OnInit {
     }
     return null;
   }
-  onSelectImg(base64: any) {
-    this.offlineForm.controls['imgFile'].setValue(base64);
+  onSelectImg(file: any) {
+    this.offlineForm.controls['imgFile'].setValue(file);
+    //this.imageName= file.name;
+    this.selectedImg = file;
   }
-  receiveFileName($event: string) {
+  /* receiveFileName($event: string) {
     this.imageName = $event;
-  }
-  initializeVoiceRecording(): void {
-    navigator.mediaDevices
-      .getUserMedia({ audio: true })
-      .then((stream) => {
-        this.mediaRecorder = new MediaRecorder(stream);
-        this.mediaRecorder.ondataavailable = (event: any) => {
-          this.audioChunks.push(event.data);
-        };
-        this.mediaRecorder.onstop = () => {
-          this.audioBlob = new Blob(this.audioChunks, { type: 'audio/mpeg' });
-          this._utils.convertFileToBase64(this.audioBlob, (base64: string) => {
-            this.audioUrl = this.sanitizer.bypassSecurityTrustUrl(base64);
-            this.offlineForm.controls['voiceInput'].setValue(base64);
-            //this.saveFormData();
-          });
-          /*  this.audioUrl = URL.createObjectURL(this.audioBlob);
-          this.offlineForm.controls['voiceInput'].setValue(this.audioBlob); */
-          this.audioChunks = [];
-          //this.saveFormDataLocally();
-        };
-      })
-      .catch((error) => {
-        this._utils.displayAlert('Error accessing microphone', 'Error');
-        console.error('Error accessing microphone', error);
-      });
-  }
-
-  startRecording() {
-    try {
-      if (this.mediaRecorder) {
-        this.isRecording = true;
-        this.mediaRecorder.start();
-      }
-    } catch (e) {
-      this._utils.displayAlert('Please Enable accessing microphone', 'Error');
-    }
-  }
-
-  stopRecording(): void {
-    if (this.mediaRecorder) {
-      this.isRecording = false;
-      this.mediaRecorder.stop();
-    }
-  }
-
-  /*   playAudio(): void {
-    if (this.audioUrl) {
-      const audio = new Audio(this.audioUrl);
-      audio.play();
-    }
   } */
+  onRecordMake(base64: string) {
+    this.offlineForm.controls['voiceInput'].setValue(base64);
+  }
+
   onOfflineFormSubmit() {
     const formData = this.offlineForm.value;
     console.log('Form Submitted!', formData);
@@ -140,15 +90,17 @@ export class OfflineForm implements OnInit {
   resetOfflineForm() {
     this.offlineForm.reset();
     this.selectImageComponent.clearFormField();
-    this.audioUrl = null;
+    this.recordVoiceComponent.clearFormField();
   }
   saveFormDataLocally(formDatafromForm: any): void {
+    // console.log(this.selectedImg);
+
     const formData: UserDto = {
       //this.offlineForm.controls['imgFile'].value
       name: this.offlineForm.controls['name'].value ?? '',
       imgFile: {
-        imageUrl: this.offlineForm.controls['imgFile'].value ?? '',
-        imgName: this.imageName,
+        imageUrl: this.selectedImg,
+        imgName: this.selectedImg.name,
       },
       voiceInput: this.offlineForm.controls['voiceInput'].value ?? '',
     };
@@ -157,10 +109,9 @@ export class OfflineForm implements OnInit {
     submissions.push(formData);
     localStorage.setItem('formData', JSON.stringify(submissions));
   }
-
   sendFormDataToServer(formData: any): void {
     console.log('server data', formData);
-    const formDataToserver: UserDto = {
+    /*   const formDataToserver: UserDto = {
       //this.offlineForm.controls['imgFile'].value
       name: this.offlineForm.controls['name'].value ?? '',
       imgFile: {
@@ -168,9 +119,9 @@ export class OfflineForm implements OnInit {
         imgName: this.imageName,
       },
       voiceInput: this.offlineForm.controls['voiceInput'].value ?? '',
-    };
-    console.log('formDataToserver',formDataToserver);
-    
+    }; */
+    //console.log('formDataToserver',formDataToserver);
+
     /*  // Adjust the URL and request options as needed
     this.http.post('https://your-server-url/upload', fileData).subscribe(
       response => {
@@ -186,14 +137,13 @@ export class OfflineForm implements OnInit {
     window.addEventListener('online', this.syncDataWithServer.bind(this));
     this.syncDataWithServer();
   }
-
   syncDataWithServer(): void {
     if (navigator.onLine) {
       const submissions = JSON.parse(localStorage.getItem('formData') || '[]');
       if (localStorage.getItem('formData')) {
         submissions.forEach((formData: any) => {
           this.sendFormDataToServer(formData);
-          console.log(formData);
+          //   console.log(formData);
         });
         localStorage.removeItem('formData');
         this._utils.displayAlert(

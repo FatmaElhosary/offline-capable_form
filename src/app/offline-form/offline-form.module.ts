@@ -8,6 +8,8 @@ import { OfflineFormPageRoutingModule } from './offline-form-routing.module';
 import { OfflineForm } from './offline-form.page';
 import { SelectImageComponent } from '../shared/select-image/select-image.component';
 import { ShowDataComponent } from './components/show-data/show-data.component';
+import { RecordVoiceComponent } from '../shared/record-voice/record-voice.component';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   imports: [
@@ -16,7 +18,8 @@ import { ShowDataComponent } from './components/show-data/show-data.component';
     FormsModule,
     OfflineFormPageRoutingModule,
     ReactiveFormsModule,
+    RouterModule
   ],
-  declarations: [OfflineForm,SelectImageComponent,ShowDataComponent],
+  declarations: [OfflineForm,SelectImageComponent,ShowDataComponent,RecordVoiceComponent],
 })
 export class TabsPageModule {}

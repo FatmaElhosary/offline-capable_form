@@ -1,4 +1,4 @@
-<div class="container  my-5 border">
+<div class="container my-5 border">
   <form [formGroup]="offlineForm">
     <div class="text-center">
       <h3>Login Form</h3>
@@ -43,8 +43,11 @@
     >
       Only JPEG, PNG, tif ,bmp and GIF formats are allowed.
     </ion-item>
-  
-      <app-select-image (imageSelected)="onSelectImg($event)" (imageNameSelected)="receiveFileName($event)" ></app-select-image>
+    <!-- (imageNameSelected)="receiveFileName($event)" -->
+    <app-select-image
+      (imageSelected)="onSelectImg($event)"
+     
+    ></app-select-image>
     <!-- Record voice input -->
 
     <div
@@ -58,30 +61,8 @@
         Audio is required.
       </ion-item>
     </div>
-    <h6 class="my-2">Record Audio</h6>
-    <div class="d-flex justify-content-between align-items-center p-3">
-      <div class="col-9">
-        <div *ngIf="isRecording" (click)="stopRecording()">
-          <div class="recording-container">
-            <div class="recording-circle"></div>
-            <div class="recording-text">Stop Recording</div>
-          </div>
-        </div>
-        <!-- display audio -->
-        <audio
-          *ngIf="audioUrl && !isRecording"
-          [src]="audioUrl"
-          controls
-        ></audio>
-      </div>
-      <div *ngIf="!isRecording " (click)="startRecording()" class="col-2">
-        <ion-icon name="mic-off-outline" size="large"></ion-icon>
-      </div>
-      <div *ngIf="isRecording " (click)="stopRecording()" class="col-2">
-        <ion-icon name="mic-outline" size="large"></ion-icon>
-      </div>
-    </div>
 
+    <app-record-voice (audio)="onRecordMake($event)"></app-record-voice>
     <!--end  Record voice input -->
     <ion-button
       [disabled]="offlineForm.invalid"
@@ -95,13 +76,14 @@
     </ion-button>
   </form>
 </div>
-<a
-
-expand="block"
-color="success"
-routerLink="/show-data"
-size="small"
-class="mb-3"
+<ion-button
+  expand="block"
+  color="success"
+  routerLink="/show-data"
+  routerLinkActive="active"
+  size="small"
+  class="mb-3"
 >
-Show Data
-</a>
+  Show Saved Data in Local
+</ion-button>
+<router-outlet> </router-outlet>
