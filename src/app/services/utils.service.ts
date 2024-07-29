@@ -32,4 +32,13 @@ export class UtilsService {
   async dismissLoading() {
 	this.loadingController.dismiss();
   }
+
+
+  convertFileToBase64(file: Blob, callback: (base64: string) => void): void {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      callback(reader.result as string);
+    };
+  }
 }

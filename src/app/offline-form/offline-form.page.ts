@@ -1,8 +1,9 @@
-import { Component, ElementRef, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { UtilsService } from '../services/utils.service';
 import { UserDto } from '../models/user';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { SelectImageComponent } from '../shared/select-image/select-image.component';
 
 @Component({
   selector: 'offline-form',
@@ -10,8 +11,9 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
   styleUrls: ['offline-form.page.scss'],
 })
 export class OfflineForm implements OnInit {
-  selectedFile: any;
-  imageUrl: SafeUrl | null = null;
+  imageName: string = '';
+  @ViewChild(SelectImageComponent)
+  selectImageComponent: SelectImageComponent=new SelectImageComponent(null,null);
   //record
   mediaRecorder: any;
   audioChunks: any[] = [];
@@ -59,26 +61,12 @@ export class OfflineForm implements OnInit {
     }
     return null;
   }
-
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
-      //this.offlineForm.patchValue({ imgFile: this.selectedFile });
-      //Show image preview
-      this.convertFileToBase64(this.selectedFile, (base64: string) => {
-        this.offlineForm.controls['imgFile'].setValue(base64);
-        this.imageUrl = this.sanitizer.bypassSecurityTrustUrl(base64);
-      });
-      /*  let reader = new FileReader();
-      reader.onload = (event: any) => {
-        this.imageUrl = event.target.result;
-        // this.offlineForm.patchValue({ imgFile: this.imageUrl});
-      };
-      reader.readAsDataURL(this.selectedFile); */
-    }
+  onSelectImg(base64: any) {
+    this.offlineForm.controls['imgFile'].setValue(base64);
   }
-
+  receiveFileName($event: string) {
+    this.imageName = $event;
+  }
   initializeVoiceRecording(): void {
     navigator.mediaDevices
       .getUserMedia({ audio: true })
@@ -89,7 +77,7 @@ export class OfflineForm implements OnInit {
         };
         this.mediaRecorder.onstop = () => {
           this.audioBlob = new Blob(this.audioChunks, { type: 'audio/mpeg' });
-          this.convertFileToBase64(this.audioBlob, (base64: string) => {
+          this._utils.convertFileToBase64(this.audioBlob, (base64: string) => {
             this.audioUrl = this.sanitizer.bypassSecurityTrustUrl(base64);
             this.offlineForm.controls['voiceInput'].setValue(base64);
             //this.saveFormData();
@@ -123,13 +111,7 @@ export class OfflineForm implements OnInit {
       this.mediaRecorder.stop();
     }
   }
-  convertFileToBase64(file: Blob, callback: (base64: string) => void): void {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      callback(reader.result as string);
-    };
-  }
+
   /*   playAudio(): void {
     if (this.audioUrl) {
       const audio = new Audio(this.audioUrl);
@@ -157,8 +139,7 @@ export class OfflineForm implements OnInit {
   }
   resetOfflineForm() {
     this.offlineForm.reset();
-    this.selectedFile = null;
-    this.imageUrl = null;
+    this.selectImageComponent.clearFormField();
     this.audioUrl = null;
   }
   saveFormDataLocally(formDatafromForm: any): void {
@@ -167,7 +148,7 @@ export class OfflineForm implements OnInit {
       name: this.offlineForm.controls['name'].value ?? '',
       imgFile: {
         imageUrl: this.offlineForm.controls['imgFile'].value ?? '',
-        imgName: this.selectedFile.name,
+        imgName: this.imageName,
       },
       voiceInput: this.offlineForm.controls['voiceInput'].value ?? '',
     };
@@ -179,7 +160,17 @@ export class OfflineForm implements OnInit {
 
   sendFormDataToServer(formData: any): void {
     console.log('server data', formData);
-
+    const formDataToserver: UserDto = {
+      //this.offlineForm.controls['imgFile'].value
+      name: this.offlineForm.controls['name'].value ?? '',
+      imgFile: {
+        imageUrl: this.offlineForm.controls['imgFile'].value ?? '',
+        imgName: this.imageName,
+      },
+      voiceInput: this.offlineForm.controls['voiceInput'].value ?? '',
+    };
+    console.log('formDataToserver',formDataToserver);
+    
     /*  // Adjust the URL and request options as needed
     this.http.post('https://your-server-url/upload', fileData).subscribe(
       response => {
@@ -213,9 +204,5 @@ export class OfflineForm implements OnInit {
     }
   }
 
-  ngOnDestroy() {
-    /*    if (this.audioUrl) {
-      URL.revokeObjectURL(this.audioUrl);
-    } */
-  }
+  ngOnDestroy() {}
 }
