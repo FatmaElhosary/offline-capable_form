@@ -1,0 +1,18 @@
+<div class="container">
+
+  <h4 *ngIf="userData==[]||userData==null">No Data saved in Local</h4>
+  
+  <div class="col my-2">
+    <div *ngFor="let data of userData;  index as i" class="row mt-3 bg-dark">
+      <p>Sr.{{i+1}}</p>
+      <p>{{ data.name }}</p>
+      <img
+        [src]="data['imgFile'].imageUrl"
+        [alt]="data['imgFile'].imgName"
+        class="img-fluid my-2"
+      />
+      <audio [src]="data.voiceInput" controls  type="audio/mpeg"></audio>
+      <hr />
+    </div>
+  </div>
+</div>

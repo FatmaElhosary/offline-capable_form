@@ -1,0 +1,36 @@
+.iamge-select {
+	h3 {
+		font-size: 1rem;
+		line-height: 2rem;
+		color: #454551;
+	}
+	.slecet-content {
+		border: 2px dashed #bdbdbd;
+		background-color: #f9f9fa;
+	}
+	.placeholder-text {
+		img {
+			margin-right: 0.5rem;
+		}
+		.msg {
+			font-size: 12px;
+		}
+	}
+	.add-btn {
+		text-align: right;
+	}
+	.hint {
+		font-size: 0.75rem;
+		line-height: 2rem;
+		color: #a2a2a8;
+	}
+	.selected-image {
+		font-size: 0.75rem;
+		line-height: 1rem;
+		color: #a2a2a8;
+		display: block;
+		overflow: hidden;
+		/* text-overflow: ellipsis; */
+		white-space: nowrap;
+	}
+}

@@ -1,0 +1,27 @@
+<div class="iamge-select mt-3">
+  <h3 class="my-2 frutiger65">{{ title }}</h3>
+  <div
+    class="d-flex justify-content-between p-3 slecet-content border-raduis"
+    (click)="fileLoader.click()"
+  >
+    <input
+      type="file"
+      id="fileLoader"
+      #fileLoader
+      name="files"
+      (change)="selectImage($event)"
+      title="Load File"
+      hidden
+    />
+    <p class="col-10 placeholder-text">
+      <span class="msg">{{ message }} </span>
+      <span class="selected-image">{{ imageName }}</span>
+    </p>
+    <div class="add-btn col-2">
+      <ion-icon name="add-circle-outline"></ion-icon>
+    </div>
+  </div>
+  <p class="hint">
+    {{ hint }}
+  </p>
+</div>
